@@ -1,0 +1,5 @@
+#!/usr/bin/env perl
+
+use Leeder::Poller;
+
+Leeder::Poller->new(['DBI:SQLite:dbname=feeds.db', '', ''])->run;
