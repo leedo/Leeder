@@ -2,6 +2,7 @@ CREATE TABLE feed (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name VARCHAR(64) NOT NULL,
   url VARCHAR(256) NOT NULL,
+  alias_of INTEGER NULL,
   last_mod VARCHAR(64),
   subscribers INTEGER DEFAULT 0
 );
@@ -15,5 +16,6 @@ CREATE TABLE entry (
   content TEXT,
   summary TEXT,
   issued DATETIME,
-  modified DATETIME
+  modified DATETIME,
+  read BOOLEAN DEFAULT 0
 );

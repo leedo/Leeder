@@ -12,6 +12,7 @@ sub new {
     urls => {},
     dbi  => AnyEvent::DBI->new(@$dsn,
       PrintError => 0,
+      sqlite_unicode => 1,
       exec_server => 1,
       on_error => sub { AE::log warn => $@ }
     ),
@@ -22,7 +23,7 @@ sub run {
   my $self = shift;
   my $cv = AE::cv;
   AE::signal $_ => sub {$cv->send} for qw/QUIT INT/;
-  AE::timer 0, 60, sub {$self->update_urls};
+  $self->{t} = AE::timer 0, 60, sub {$self->update_urls};
   $cv->recv;
 }
 
@@ -37,20 +38,19 @@ sub update_urls {
     for my $row (@$rows) {
       my ($id, $url, $subs, $last_mod) = @$row;
 
-      if (!exists $self->{urls}{$url} and $subs > 0) {
-
-        AE::log info => "adding $url";
+      if (!exists $self->{urls}{$id} and $subs > 0) {
+        AE::log info => "adding $id ($url)";
 
         $self->{urls}{$id} = AnyEvent::Feed->new(
           url      => $url,
-          interval => 15,
+          interval => 60 * 3,
           on_fetch => sub { $self->update_feed($id, @_) },
           last_mod => $last_mod,
         );
       }
       else {
-        AE::log info => "removing $url";
-        delete $self->{urls}{$url};
+        AE::log info => "removing $id";
+        delete $self->{urls}{$id};
       }
     }
   });
