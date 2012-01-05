@@ -2,6 +2,7 @@
   var Leeder = function() {
     var current_entry = null;
     var current_feed = null;
+    var show_unread = false;
     var shift = false;
 
     $(document).bind("keypress", function(e) {
@@ -76,6 +77,20 @@
       window.open($(this).attr("href"));
     });
 
+    $('#show_unread').bind("click", function() {
+      var node = $(this);
+      if (node.text() == "show all") {
+        show_unread = true;
+        node.text("hide unread");
+        getFeed(current_feed.get(0).id);
+      }
+      else {
+        show_unread = false;
+        node.text("show all");
+        $("#entries").find("li.read").remove();
+      }
+    });
+
     var selectFeed = function(id) {
       var li = $('#'+id);
       li.parents("ul").find(".selected").removeClass("selected");
@@ -135,7 +150,8 @@
     
     var getFeed = function(id) {
       var list = $("#entries");
-      $.getJSON("/api/feed/"+id, function(entries) {
+      var url = "/api/feed/"+id+"?show_unread="+(show_unread ? "1" : "0");
+      $.getJSON(url, function(entries) {
         list.html("");
         $(entries).each(function(i,entry) {
           var meta = (entry.author ? entry.author+"&mdash;" : "")

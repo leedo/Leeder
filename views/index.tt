@@ -1,6 +1,6 @@
 <div id="feeds_wrap">
   <h2>Feeds</h2>
-  <span id="add_feed">+</span>
+  <button id="add_feed">+</button>
   <form id="new_feed">
     <input placeholder="URL" type="text" name="url" id="new_feed_url"></input>
   </form>
@@ -11,6 +11,7 @@
 
 <div id="entries_wrap">
   <h2 id="entries_title">&nbsp;</h2>
+  <button id="show_unread">show all</button>
   <ul id="entries">
     <p>
       Add feeds using the <strong>+</strong> button to the left. Click

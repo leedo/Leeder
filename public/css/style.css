@@ -21,7 +21,7 @@ div#feeds_wrap h2 {
   background: #fff;
 }
 
-span#add_feed {
+button#add_feed {
   position: absolute;
   top: 10px;
   right: 10px;
@@ -30,12 +30,17 @@ span#add_feed {
   display: block;
   width: 1.2em;
   line-height: 1.2em;
+  height: 1.2em;
   text-align: center;
   font-weight: normal;
   cursor: pointer;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-size: 14px;
 }
 
-span#add_feed:hover {
+button#add_feed:hover {
   background: #eee;
 }
 
@@ -194,3 +199,21 @@ ul#entries > li.selected {
   box-shadow: -2px 2px 5px rgba(0,0,0,0.2);
 }
 
+button#show_unread {
+  position: fixed;
+  z-index: 100;
+  top: 7px;
+  right: 10px;
+  color: #00e;
+  cursor: pointer;
+  margin: 0;
+  padding: 4px;
+  display: block;
+  border: none;
+  background: none;
+  line-height: 1em;
+}
+
+button#show_unread:hover {
+  background: #eee;
+}

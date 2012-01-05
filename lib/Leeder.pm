@@ -34,13 +34,13 @@ get '/api/feeds' => sub {
 get '/api/feed/all' => sub {
   my $dbh = $conn->dbh;
 
-  my $read  = param("read")  || 0;
-  my $start = param("start") || 0;
-  my $limit = param("items") || 25;
+  my $read  = param("show_unread") || 0;
+  my $start = param("start")  || 0;
+  my $limit = param("items")  || 25;
 
   $limit = 10 if $limit > 50;
 
-  my $sth = $dbh->prepare_cached("SELECT * FROM entry WHERE read=? ORDER BY issued,modified LIMIT ?,?");
+  my $sth = $dbh->prepare_cached("SELECT * FROM entry WHERE read<=? ORDER BY issued,modified LIMIT ?,?");
   $sth->execute($read, $start, $limit);
   my $rows = $sth->fetchall_arrayref({});
 
@@ -54,13 +54,13 @@ get '/api/feed/:id' => sub {
   my $feed = param "id";
   die "id parameter is required" unless $feed =~ /^\d+$/;
 
-  my $read  = param("read")   || 0;
+  my $read  = param("show_unread") || 0;
   my $start = param("start")  || 0;
   my $limit = param("items")  || 25;
 
   $limit = 10 if $limit > 50;
 
-  my $sth = $dbh->prepare_cached("SELECT * FROM entry WHERE feed_id=? AND read=? ORDER BY issued,modified LIMIT ?,?");
+  my $sth = $dbh->prepare_cached("SELECT * FROM entry WHERE feed_id=? AND read<=? ORDER BY issued,modified LIMIT ?,?");
   $sth->execute($feed, $read, $start, $limit);
   my $rows = $sth->fetchall_arrayref({});
 
