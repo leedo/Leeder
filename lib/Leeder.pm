@@ -30,18 +30,34 @@ get '/api/feeds' => sub {
   to_json $rows;
 };
 
-get '/api/feed/:id' => sub {
+get '/api/feed/all' => sub {
   my $dbh = $conn->dbh;
 
-  my $feed   = param "id";
-  die "id parameter is required" unless $feed =~ /\d+/;
-
-  my $start  = param("start")  || 0;
-  my $limit  = param("items")  || 10;
+  my $start = param("start") || 0;
+  my $limit = param("items") || 25;
 
   $limit = 10 if $limit > 50;
 
-  my $sth = $dbh->prepare_cached("SELECT * FROM entry WHERE feed_id=? LIMIT ?,?");
+  my $sth = $dbh->prepare_cached("SELECT * FROM entry ORDER BY issued,modified LIMIT ?,?");
+  $sth->execute($start, $limit);
+  my $rows = $sth->fetchall_arrayref({});
+
+  content_type "application/javascript; charset=utf-8";
+  to_json $rows;
+};
+
+get '/api/feed/:id' => sub {
+  my $dbh = $conn->dbh;
+
+  my $feed = param "id";
+  die "id parameter is required" unless $feed =~ /^\d+$/;
+
+  my $start = param("start")  || 0;
+  my $limit = param("items")  || 25;
+
+  $limit = 10 if $limit > 50;
+
+  my $sth = $dbh->prepare_cached("SELECT * FROM entry WHERE feed_id=? ORDER BY issued,modified LIMIT ?,?");
   $sth->execute($feed, $start, $limit);
   my $rows = $sth->fetchall_arrayref({});
 
@@ -49,20 +65,17 @@ get '/api/feed/:id' => sub {
   to_json $rows;
 };
 
-get '/api/feed/all' => sub {
+del '/api/feed/:id' => sub {
   my $dbh = $conn->dbh;
 
-  my $start = param("start") || 0;
-  my $limit = param("items") || 10;
+  my $feed = param "id";
+  die "id parameter is required" unless $feed =~ /^\d$/;
 
-  $limit = 10 if $limit > 50;
+  $dbh->do("DELETE FROM feed WHERE id=?", {}, $feed);
+  $dbh->do("DELETE FROM entry WHERE feed_id=?", {}, $feed);
 
-  my $sth = $dbh->prepare_cached("SELECT * FROM entry LIMIT ?,?");
-  $sth->execute($start, $limit);
-  my $rows = $sth->fetchall_arrayref({});
-
-  content_type "application/javascript; charset=utf-8";
-  to_json $rows;
+  content_type "application/javascript";
+  to_json {success => 1};
 };
 
 post '/api/feed' => sub {
@@ -77,7 +90,7 @@ post '/api/feed' => sub {
   $feed_sth->execute($feed->title, $url);
   my $feed_id = $dbh->last_insert_id("", "", "", "");
 
-  my @fields = qw/feed_id content summary id title link author issued modified/;
+  my @fields = qw/id feed_id content summary issued modified title link author/;
 
   my $columns = join ",", @fields;
   my $placeholders = join ",", map {"?"} @fields;
@@ -89,10 +102,16 @@ post '/api/feed' => sub {
 
   for my $entry ($feed->entries) {
     my $hash = entry_to_hash($entry);
-    $entry->id($hash);
 
-    my @bind = ($feed_id, $entry->content->body, $entry->summary->body);
-    push @bind, map {$entry->$_} @fields[3 .. $#fields];
+    my @bind = (
+      $hash, $feed_id, $entry->content->body, $entry->summary->body,
+      ($entry->issued ? $entry->issued->epoch : ""),
+      ($entry->modified ? $entry->modified->epoch : ""),
+    );
+
+    # the rest are just properties
+    push @bind, map {$entry->$_} @fields[6 .. $#fields];
+
     $entry_sth->execute(@bind);
   }
 
@@ -109,7 +128,7 @@ post '/api/entry/:id' => sub {
   $dbh->do("UPDATE entry SET read=?", {}, $read);
 
   content_type "application/javascript; charset=utf-8";
-  to_json {read => $read};
+  to_json {success => 1};
 };
 
 sub entry_to_hash {

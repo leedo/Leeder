@@ -14,7 +14,7 @@ CREATE TABLE entry (
   author BLOB,
   content BLOB,
   summary BLOB,
-  issued DATETIME,
-  modified DATETIME,
+  issued INTEGER,
+  modified INTEGER,
   read BOOLEAN DEFAULT 0
 );

@@ -34,11 +34,12 @@
       $.ajax({
         type: "POST",
         url: "/api/feed",
-        data: {url: input.attr("value")},
+        data: {url: input.val()},
         dataType: "json",
         success: function(feed) {
-          input.attr("value", "");
+          input.val("");
           form.removeClass("visible");
+          $("#add_feed").html("+");
           $("#feeds").append('<li id="'+feed.id+'">'+feed.name+'</li>');
         }
       });
@@ -64,9 +65,7 @@
         url: "/api/entry/" + id,
         data: {read: 1},
         dataType: "json",
-        success: function(res) {
-          console.log(res);
-        }
+        success: function(res) {}
       });
     };
 
@@ -82,7 +81,7 @@
       $.getJSON("/api/feed/"+id, function(entries) {
         list.html("");
         $(entries).each(function(i,entry) {
-          var meta = (entry.author ? entry.author : "")
+          var meta = (entry.author ? entry.author+"&mdash;" : "")
                    + (entry.issued ? entry.issued : "");
           var html = '<li id="'+entry.id+'" class="'+(entry.read ? "read" : "unread")+'">'
                    + '<h3><a href="'+entry.link+'" target="_blank">'
