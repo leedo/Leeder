@@ -13,6 +13,10 @@
                  : $("#entries").children("li").last();
         if (prev.size()) selectEntry(prev.get(0).id);
       }
+      else if (e.keyCode == 118 && current_entry != null) {
+        var href = current_entry.children("h3").find("a").attr("href");
+        if (href) window.open(href);
+      }
     });
     
     $("#add_feed").bind("click", function(e) {
