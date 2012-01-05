@@ -6,17 +6,24 @@
     var shift = false;
 
     $(document).bind("keypress", function(e) {
-      if (e.keyCode == 106) {
+      console.log(e.keyCode);
+      // j or n
+      if (e.keyCode == 106 || e.keyCode == 110) {
         var next = current_entry ? current_entry.next()
                  : $("#entries").children("li").first();
         if (next.size()) selectEntry(next.get(0).id);
       }
-      else if (e.keyCode == 107) {
+      
+      // k or p
+      else if (e.keyCode == 107 || e.keyCode == 112) {
         var prev = current_entry ? current_entry.prev()
                  : $("#entries").children("li").last();
         if (prev.size()) selectEntry(prev.get(0).id);
       }
-      else if (e.keyCode == 74) {
+
+      
+      // J or N
+      else if (e.keyCode == 74 || e.keyCode == 78) {
         var next = $('#feeds').find("li.highlighted").first().next();
         if (!next.size()) next = $('#feeds').find("li").first()
         if (next.size()) {
@@ -24,7 +31,9 @@
           next.addClass("highlighted");
         }
       }
-      else if (e.keyCode == 75) {
+
+      // K or P
+      else if (e.keyCode == 75 || e.keyCode == 80) {
         var prev = $('#feeds').find("li.highlighted").first().prev();
         if (!prev.size()) prev = $('#feeds').find("li").last();
         if (prev.size()) {
@@ -32,6 +41,8 @@
           prev.addClass("highlighted");
         }
       }
+
+      // O
       else if (e.keyCode == 79) {
         var highlighted = $('#feeds').find('li.highlighted').first();
         if (highlighted.size()) {
@@ -39,12 +50,21 @@
         }
       }
       else if (current_entry != null) {
+        // v
         if (e.keyCode == 118) {
           var href = current_entry.children("h3").find("a").attr("href");
           if (href) window.open(href);
         }
+        
+        // s
         else if (e.keyCode == 115) {
           saveEntry(current_entry.get(0).id);
+        }
+        
+        // m
+        else if (e.keyCode == 109) {
+          var read = !current_entry.hasClass("read");
+          setRead(current_entry.get(0).id, read);
         }
       }
     });
@@ -121,16 +141,24 @@
 
       window.scrollTo(0, li.get(0).offsetTop - 26);
       current_entry = li;
+      setRead(id, true);
+    };
 
-      if (!li.hasClass("read")) {
-        $.ajax({
-          type: "POST",
-          url: "/api/entry/" + id,
-          data: {read: 1},
-          dataType: "json",
-          success: function(){ li.addClass("read") }
-        });
-      }
+    var setRead = function(id, read) {
+      var li = $('#'+id);
+
+      var current = li.hasClass('read');
+      if (read == current) return;
+ 
+      $.ajax({
+        type: "POST",
+        url: "/api/entry/" + id,
+        data: {read: (read ? "1" : "0")},
+        dataType: "json",
+        success: function(){
+          read ? li.addClass("read") : li.removeClass("read");
+        }
+      });
     };
 
     var saveEntry = function(id) {
