@@ -3,7 +3,6 @@ package Leeder;
 use Dancer ':syntax';
 use Digest::SHA1 qw/sha1_base64/;
 use DBIx::Connector;
-use LWP::UserAgent;
 use XML::Feed;
 use Encode;
 use URI;
