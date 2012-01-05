@@ -1,8 +1,11 @@
 (function(){
   var Leeder = function() {
     var current_entry = null;
+    var current_feed = null;
+    var shift = false;
 
     $(document).bind("keypress", function(e) {
+      console.log(e.keyCode);
       if (e.keyCode == 106) {
         var next = current_entry ? current_entry.next()
                  : $("#entries").children("li").first();
@@ -13,9 +16,24 @@
                  : $("#entries").children("li").last();
         if (prev.size()) selectEntry(prev.get(0).id);
       }
-      else if (e.keyCode == 118 && current_entry != null) {
-        var href = current_entry.children("h3").find("a").attr("href");
-        if (href) window.open(href);
+      else if (e.keyCode == 74) {
+        var next = current_feed ? current_feed.next()
+                 : $('#feeds').children("li").first();
+        if (next.size()) selectFeed(next.get(0).id);
+      }
+      else if (e.keyCode == 75) {
+        var prev = current_feed ? current_feed.prev()
+                 : $('#feeds').children("li").last();
+        if (prev.size()) selectFeed(prev.get(0).id);
+      }
+      else if (current_entry != null) {
+        if (e.keyCode == 118) {
+          var href = current_entry.children("h3").find("a").attr("href");
+          if (href) window.open(href);
+        }
+        else if (e.keyCode == 115) {
+          saveEntry(current_entry.get(0).id);
+        }
       }
     });
     
@@ -60,6 +78,7 @@
       li.addClass("selected");
       window.scrollTo(0,0);
       current_entry = null;
+      current_feed = li;
       $("#entries_title").html(li.html());        
       getFeed(id);
     };
@@ -85,6 +104,8 @@
 
     var saveEntry = function(id) {
       var li = $('#'+id);
+      var save = li.find(".save_entry");
+      save.html("saving to pinboard");
       $.ajax({
         type: "POST",
         url: "/api/entry/" + id,
@@ -92,7 +113,7 @@
         dataType: "json",
         success: function(){
           li.addClass("saved")
-          li.find(".save_entry").html("saved to pinboard");
+          save.html("saved to pinboard");
         }
       });
     };
@@ -114,7 +135,7 @@
         list.html("");
         $(entries).each(function(i,entry) {
           var meta = (entry.author ? entry.author+"&mdash;" : "")
-                   + (entry.issued ? entry.issued : "");
+                   + (entry.issued ? new Date(entry.issued * 1000) : "");
           var html = '<li id="'+entry.id+'" class="'+(entry.read ? "read" : "unread")+'">'
                    + '<h3><a href="'+entry.link+'" target="_blank">'
                    + entry.title +'</a></h3>'
