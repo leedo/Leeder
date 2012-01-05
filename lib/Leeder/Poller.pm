@@ -33,13 +33,15 @@ sub update_urls {
 
   AE::log info => "updating URL list";
 
-  $self->{dbi}->exec("SELECT id,url,subscribers,last_mod FROM feed", sub {
+  $self->{dbi}->exec("SELECT id,url,last_mod FROM feed", sub {
     my ($dbh, $rows, $rv) = @_;
+    my %ids;
 
     for my $row (@$rows) {
-      my ($id, $url, $subs, $last_mod) = @$row;
+      my ($id, $url, $last_mod) = @$row;
+      $ids{$id} = 1;
 
-      if (!exists $self->{urls}{$id} and $subs > 0) {
+      if (!exists $self->{urls}{$id}) {
         AE::log info => "adding $id ($url)";
 
         $self->{urls}{$id} = AnyEvent::Feed->new(
@@ -49,10 +51,10 @@ sub update_urls {
           last_mod => $last_mod,
         );
       }
-      elsif ($subs <= 0) {
-        AE::log info => "removing $id";
-        delete $self->{urls}{$id};
-      }
+    }
+
+    for my $id (keys %{$self->{urls}}) {
+      delete $self->{urls}{$id} unless $ids{$id};
     }
   });
 }

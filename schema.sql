@@ -3,7 +3,6 @@ CREATE TABLE feed (
   name BLOB NOT NULL,
   url BLOB NOT NULL,
   last_mod BLOB,
-  subscribers INTEGER DEFAULT 0
 );
 
 CREATE TABLE entry (
