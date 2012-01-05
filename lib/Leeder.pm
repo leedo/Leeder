@@ -2,6 +2,7 @@ package Leeder;
 
 use Dancer ':syntax';
 use Digest::SHA1 qw/sha1_hex/;
+use Pinboard::Client;
 use DBIx::Connector;
 use XML::Feed;
 use Encode;
@@ -123,12 +124,20 @@ post '/api/feed' => sub {
 
 post '/api/entry/:id' => sub {
   my $dbh = $conn->dbh;
-
   my $entry = param("id");
-  my $read = param("read");
-  die "read parameter is required" unless $read =~ /^0|1$/;
 
-  $dbh->do("UPDATE entry SET read=? WHERE id=?", {}, $read, $entry);
+  if (my $read = param("read")) {
+    $dbh->do("UPDATE entry SET read=? WHERE id=?", {}, $read, $entry);
+  }
+
+  if (my $saved = param("saved")) {
+    my $row = $dbh->selectrow_hashref("SELECT link,title FROM entry WHERE id=?", {}, $entry);
+    if ($row) {
+      my $client = Pinboard::Client->new;
+      $client->save_bookmark($row->{link}, $row->{title});
+      $dbh->do("UPDATE entry SET saved=1 WHERE id=?", {}, $entry);
+    }
+  }
 
   content_type "application/javascript; charset=utf-8";
   to_json {success => 1};

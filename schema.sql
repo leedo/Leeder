@@ -16,5 +16,6 @@ CREATE TABLE entry (
   summary BLOB,
   issued INTEGER,
   modified INTEGER,
-  read BOOLEAN DEFAULT 0
+  read BOOLEAN DEFAULT 0,
+  saved BOOLEAN DEFAULT 0
 );

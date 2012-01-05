@@ -83,6 +83,7 @@ div#entries_wrap > h2 {
   left: 150px;
   right: 10px;
   background: #fff;
+  z-index: 99;
 }
 
 ul#entries > li.selected > div.body {
@@ -121,6 +122,42 @@ ul#entries > li > div.meta {
   color: #999;
 }
 
+ul#entries > li > button.save_entry {
+  display: none;
+}
+
+ul#entries > li:hover > button.save_entry,
+ul#entries > li.selected > button.save_entry {
+  display: block !important;
+}
+
+ul#entries > li.selected > button.save_entry {
+  z-index: 100;
+}
+
+ul#entries > li > button.save_entry {
+  position: absolute;
+  top: -1px;
+  right: -3px;
+  color: #555;
+  background: 0;
+  border: 0;
+  padding: 2px 5px;
+  margin: 0;
+  cursor: pointer;
+  background: #eee;
+  border-top: 1px solid #efefef;
+  border-bottom: 1px solid #aaa;
+  border-left: 1px solid #aaa;
+  border-right: 1px solid #ccc;
+  border-bottom-left-radius: 4px;
+  box-shadow: -1px 1px 2px rgba(0,0,0,0.25);
+}
+
+ul#entries > li > button.save_entry:hover {
+  color: #000;
+}
+
 div#entries_wrap {
   margin-left: 150px;
   margin-right: 10px;
@@ -130,16 +167,19 @@ div#entries_wrap {
 ul#entries > li {
   border-bottom: 1px solid #eee;
   border-left: 1px solid transparent;
+  border-right: 1px solid transparent;
   padding: 10px;
   padding-right: 20px;
   padding-left: 10px;
   margin-left: 0px;
+  position: relative;
 }
 
 ul#entries > li.selected {
   border-bottom: 1px solid #00e;
   border-left: 1px solid #00e;
   border-bottom-left-radius: 4px;
+  border-right: 1px solid #efefef;
   box-shadow: -2px 2px 5px rgba(0,0,0,0.2);
 }
 

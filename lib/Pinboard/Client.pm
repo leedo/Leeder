@@ -7,6 +7,13 @@ use LWP;
 sub new {
   my ($class, %args) = @_;
 
+  if ($ENV{PINBOARD_USER}) {
+    $args{user} = $ENV{PINBOARD_USER};
+  }
+  if ($ENV{PINBOARD_PASSWORD}) {
+    $args{password} = $ENV{PINBOARD_PASSWORD};
+  }
+
   die "user required"     unless defined $args{user};
   die "password required" unless defined $args{password};
 

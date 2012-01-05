@@ -58,6 +58,7 @@
       var li = $('#'+id);
       li.parents("ul").find(".selected").removeClass("selected");
       li.addClass("selected");
+      window.scrollTo(0,0);
       current_entry = null;
       $("#entries_title").html(li.html());        
       getFeed(id);
@@ -82,10 +83,29 @@
       }
     };
 
+    var saveEntry = function(id) {
+      var li = $('#'+id);
+      $.ajax({
+        type: "POST",
+        url: "/api/entry/" + id,
+        data: {saved: 1},
+        dataType: "json",
+        success: function(){
+          li.addClass("saved")
+          li.find(".save_entry").html("saved to pinboard");
+        }
+      });
+    };
+
     $("#entries").on("click", "li:not(.selected)", function(e) {
       e.preventDefault();
       $(this).parents("ul").find("li").removeClass("selected");
       selectEntry(this.id);
+    });
+
+    $("#entries").on("click", "button.save_entry", function(e) {
+      e.preventDefault();
+      saveEntry($(this).parents("li").get(0).id);
     });
     
     var getFeed = function(id) {
@@ -99,6 +119,9 @@
                    + '<h3><a href="'+entry.link+'" target="_blank">'
                    + entry.title +'</a></h3>'
                    + '<div class="meta">'+meta+'</div>'
+                   + '<button class="save_entry">'
+                     + (entry.saved ? "saved" : "save")
+                     + ' to pinboard</button>'
                    + '<div class="body">'+entry.content+'</div>'
                    + '</li>';
           list.append(html);
