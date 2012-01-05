@@ -70,6 +70,11 @@
     $("#feeds").on("click", "li:not(.selected)", function (){
       selectFeed(this.id);
     });
+    
+    $("#entries").on("click", "div.body a", function(e) {
+      e.preventDefault();
+      window.open($(this).attr("href"));
+    });
 
     var selectFeed = function(id) {
       var li = $('#'+id);

@@ -15,7 +15,7 @@ sub new {
     dbi  => AnyEvent::DBI->new(@$dsn,
       PrintError => 0,
       exec_server => 1,
-      on_error => sub { AE::log warn => $@ }
+      on_error => sub { AE::log(warn => $@) if $_[3]}
     ),
   }, $class;
 }
@@ -49,7 +49,7 @@ sub update_urls {
           last_mod => $last_mod,
         );
       }
-      else {
+      elsif ($subs <= 0) {
         AE::log info => "removing $id";
         delete $self->{urls}{$id};
       }
