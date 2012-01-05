@@ -5,7 +5,6 @@
     var shift = false;
 
     $(document).bind("keypress", function(e) {
-      console.log(e.keyCode);
       if (e.keyCode == 106) {
         var next = current_entry ? current_entry.next()
                  : $("#entries").children("li").first();

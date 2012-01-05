@@ -2,9 +2,11 @@ package Leeder::Poller;
 
 use AnyEvent;
 use AnyEvent::Log;
-use AnyEvent::Feed;
 use AnyEvent::DBI;
+use AnyEvent::Feed;
 use common::sense;
+use Encode;
+use Digest::SHA1 qw/sha1_hex/;
 
 sub new {
   my ($class, $dsn) = @_;
@@ -12,7 +14,6 @@ sub new {
     urls => {},
     dbi  => AnyEvent::DBI->new(@$dsn,
       PrintError => 0,
-      sqlite_unicode => 1,
       exec_server => 1,
       on_error => sub { AE::log warn => $@ }
     ),
@@ -75,15 +76,18 @@ sub update_feed {
 
   for (@$new) {
     my ($hash, $entry) = @$_;
-    $entry->id($hash);
 
-    my @fields = qw/feed_id content summary id title link author issued modified/;
+    my @fields = qw/id feed_id content summary issued modified title link author/;
 
     my $columns = join ",", @fields;
     my $placeholders = join ",", map {"?"} @fields;
 
-    my @bind = ($feed_id, $entry->content->body, $entry->summary->body);
-    push @bind, map {$entry->$_} @fields[3 .. $#fields];
+    my @bind = (
+      $hash, $feed_id, $entry->content->body, $entry->summary->body,
+      ($entry->issued ? $entry->issued->epoch : ""),
+      ($entry->modified ? $entry->modified->epoch : ""),
+    );
+    push @bind, map {$entry->$_} @fields[6 .. $#fields];
 
     $self->{dbi}->exec(
       "INSERT INTO entry ($columns) VALUES($placeholders)",
@@ -91,5 +95,19 @@ sub update_feed {
     );
   }
 }
+
+# monkey patch AE::Feed to use sha1_hex... bleh
+*AnyEvent::Feed::_entry_to_hash = sub {
+   my ($entry) = @_;
+   my $x = sha1_hex
+      encode 'utf-8',
+         (my $a = join '/',
+            $entry->title,
+            ($entry->summary  ? $entry->summary->body : ''),
+            ($entry->content  ? $entry->content->body : ''),
+            $entry->id,
+            $entry->link);
+   $x
+};
 
 1;
