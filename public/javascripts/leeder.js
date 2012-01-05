@@ -24,6 +24,7 @@
       else {
         form.addClass("visible");
         $(this).html("&ndash;");
+        form.get(0).elements['url'].focus();
       }
     });
 
