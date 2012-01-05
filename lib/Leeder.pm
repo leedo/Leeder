@@ -1,7 +1,7 @@
 package Leeder;
 
 use Dancer ':syntax';
-use Digest::SHA1 qw/sha1_base64/;
+use Digest::SHA1 qw/sha1_hex/;
 use DBIx::Connector;
 use XML::Feed;
 use Encode;
@@ -122,10 +122,11 @@ post '/api/feed' => sub {
 post '/api/entry/:id' => sub {
   my $dbh = $conn->dbh;
 
+  my $entry = param("id");
   my $read = param("read");
   die "read parameter is required" unless $read =~ /^0|1$/;
 
-  $dbh->do("UPDATE entry SET read=?", {}, $read);
+  $dbh->do("UPDATE entry SET read=? WHERE id=?", {}, $read, $entry);
 
   content_type "application/javascript; charset=utf-8";
   to_json {success => 1};
@@ -133,7 +134,7 @@ post '/api/entry/:id' => sub {
 
 sub entry_to_hash {
   my ($entry) = @_;
-  my $x = sha1_base64
+  my $x = sha1_hex
     encode 'utf-8',
       (my $a = join '/',
         $entry->title,

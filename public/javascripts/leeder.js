@@ -6,12 +6,12 @@
       if (e.keyCode == 106) {
         var next = current_entry ? current_entry.next()
                  : $("#entries").children("li").first();
-        if (next.size()) selectEntry(next);
+        if (next.size()) selectEntry(next.get(0).id);
       }
       else if (e.keyCode == 107) {
         var prev = current_entry ? current_entry.prev()
                  : $("#entries").children("li").last();
-        if (prev.size()) selectEntry(prev);
+        if (prev.size()) selectEntry(prev.get(0).id);
       }
     });
     
@@ -46,34 +46,41 @@
     });
 
     $("#feeds").on("click", "li:not(.selected)", function (){
-      var li = $(this);
+      selectFeed(this.id);
+    });
+
+    var selectFeed = function(id) {
+      var li = $('#'+id);
       li.parents("ul").find(".selected").removeClass("selected");
       li.addClass("selected");
       current_entry = null;
       $("#entries_title").html(li.html());        
-      getFeed(li.get(0).id);
-    });
+      getFeed(id);
+    };
 
-    var selectEntry = function(node) {
-      node.parents("ul").find(".selected").removeClass("selected");
-      node.addClass("selected");
-      window.scrollTo(0, node.get(0).offsetTop - 26);
-      current_entry = node;
-      var id = node.get(0).id;
-      $.ajax({
-        type: "POST",
-        url: "/api/entry/" + id,
-        data: {read: 1},
-        dataType: "json",
-        success: function(res) {}
-      });
+    var selectEntry = function(id) {
+      var li = $('#'+id);
+      li.parents("ul").find(".selected").removeClass("selected");
+      li.addClass("selected");
+
+      window.scrollTo(0, li.get(0).offsetTop - 26);
+      current_entry = li;
+
+      if (!li.hasClass("read")) {
+        $.ajax({
+          type: "POST",
+          url: "/api/entry/" + id,
+          data: {read: 1},
+          dataType: "json",
+          success: function(){ li.addClass("read") }
+        });
+      }
     };
 
     $("#entries").on("click", "li:not(.selected)", function(e) {
       e.preventDefault();
-      var li = $(this);
-      li.parents("ul").find("li").removeClass("selected");
-      selectEntry(li);
+      $(this).parents("ul").find("li").removeClass("selected");
+      selectEntry(this.id);
     });
     
     var getFeed = function(id) {
@@ -105,11 +112,13 @@
     };
 
     this.refreshFeeds = refreshFeeds;
+    this.selectFeed = selectFeed;
   };
 
   $(document).ready(function(){
     var leeder = new Leeder();
     leeder.refreshFeeds();
+    leeder.select
   })
 
 })();

@@ -7,7 +7,7 @@ CREATE TABLE feed (
 );
 
 CREATE TABLE entry (
-  id VARCHAR(27) UNIQUE NOT NULL,
+  id TEXT UNIQUE NOT NULL,
   feed_id INTEGER NOT NULL,
   title BLOB,
   link BLOB,

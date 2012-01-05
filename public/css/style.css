@@ -107,6 +107,10 @@ ul#entries > li > h3 > a {
   text-decoration: none;
 }
 
+ul#entries > li.read > h3 > a {
+  color: #666;
+}
+
 ul#entries > li.selected > h3 > a {
   color: #00e;
 }
