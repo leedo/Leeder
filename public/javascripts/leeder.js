@@ -58,6 +58,16 @@
       node.addClass("selected");
       window.scrollTo(0, node.get(0).offsetTop - 26);
       current_entry = node;
+      var id = node.get(0).id;
+      $.ajax({
+        type: "POST",
+        url: "/api/entry/" + id,
+        data: {read: 1},
+        dataType: "json",
+        success: function(res) {
+          console.log(res);
+        }
+      });
     };
 
     $("#entries").on("click", "li:not(.selected)", function(e) {
@@ -74,7 +84,7 @@
         $(entries).each(function(i,entry) {
           var meta = (entry.author ? entry.author : "")
                    + (entry.issued ? entry.issued : "");
-          var html = '<li id="'+entry.id+'">'
+          var html = '<li id="'+entry.id+'" class="'+(entry.read ? "read" : "unread")+'">'
                    + '<h3><a href="'+entry.link+'" target="_blank">'
                    + entry.title +'</a></h3>'
                    + '<div class="meta">'+meta+'</div>'
@@ -101,7 +111,6 @@
   $(document).ready(function(){
     var leeder = new Leeder();
     leeder.refreshFeeds();
-    setInterval(leeder.refreshFeeds, 1000 * 10);
   })
 
 })();

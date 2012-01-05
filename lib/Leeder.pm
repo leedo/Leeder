@@ -12,7 +12,6 @@ use common::sense;
 our $VERSION = '0.1';
 
 my $conn = DBIx::Connector->new('dbi:SQLite:dbname=feeds.db', '', '', {
-  sqlite_unicode => 1,
   RaiseError => 1,
   AutoCommit => 1,
 });
@@ -28,7 +27,7 @@ get '/api/feeds' => sub {
   $sth->execute;
   my $rows = $sth->fetchall_arrayref({});
 
-  content_type "text/json; charset=utf-8";
+  content_type "application/javascript; charset=utf-8";
   to_json $rows;
 };
 
@@ -47,7 +46,7 @@ get '/api/feed/:id' => sub {
   $sth->execute($feed, $start, $limit);
   my $rows = $sth->fetchall_arrayref({});
 
-  content_type "text/json; charset=utf-8";
+  content_type "application/javascript; charset=utf-8";
   to_json $rows;
 };
 
@@ -63,7 +62,7 @@ get '/api/feed/all' => sub {
   $sth->execute($start, $limit);
   my $rows = $sth->fetchall_arrayref({});
 
-  content_type "text/json; charset=utf-8";
+  content_type "application/javascript; charset=utf-8";
   to_json $rows;
 };
 
@@ -92,12 +91,13 @@ post '/api/feed' => sub {
   for my $entry ($feed->entries) {
     my $hash = entry_to_hash($entry);
     $entry->id($hash);
+
     my @bind = ($feed_id, $entry->content->body, $entry->summary->body);
     push @bind, map {$entry->$_} @fields[3 .. $#fields];
     $entry_sth->execute(@bind);
   }
 
-  content_type "text/json; charset=utf-8";
+  content_type "application/javascript; charset=utf-8";
   to_json {name => $feed->title, id => $feed_id};
 };
 
@@ -107,9 +107,9 @@ post '/api/entry/:id' => sub {
   my $read = param("read");
   die "read parameter is required" unless $read =~ /^0|1$/;
 
-  $dbh->do("UPDATE entry SET read=?", $read);
+  $dbh->do("UPDATE entry SET read=?", {}, $read);
 
-  content_type "text/json; charset=utf-8";
+  content_type "application/javascript; charset=utf-8";
   to_json {read => $read};
 };
 
