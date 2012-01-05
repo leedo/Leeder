@@ -17,14 +17,26 @@
         if (prev.size()) selectEntry(prev.get(0).id);
       }
       else if (e.keyCode == 74) {
-        var next = current_feed ? current_feed.next()
-                 : $('#feeds').children("li").first();
-        if (next.size()) selectFeed(next.get(0).id);
+        var next = $('#feeds').find("li.highlighted").first().next();
+        if (!next.size()) next = $('#feeds').find("li").first()
+        if (next.size()) {
+          $('#feeds').find("li.highlighted").removeClass("highlighted");
+          next.addClass("highlighted");
+        }
       }
       else if (e.keyCode == 75) {
-        var prev = current_feed ? current_feed.prev()
-                 : $('#feeds').children("li").last();
-        if (prev.size()) selectFeed(prev.get(0).id);
+        var prev = $('#feeds').find("li.highlighted").first().prev();
+        if (!prev.size()) prev = $('#feeds').find("li").last();
+        if (prev.size()) {
+          $('#feeds').find("li.highlighted").removeClass("highlighted");
+          prev.addClass("highlighted");
+        }
+      }
+      else if (e.keyCode == 79) {
+        var highlighted = $('#feeds').find('li.highlighted').first();
+        if (highlighted.size()) {
+          selectFeed(highlighted.get(0).id);
+        }
       }
       else if (current_entry != null) {
         if (e.keyCode == 118) {
